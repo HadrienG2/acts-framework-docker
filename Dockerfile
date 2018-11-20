@@ -24,5 +24,28 @@ ENV ACTSFW_SPACK_SPEC="acts-framework@develop +dd4hep +fatras +geant4 +legacy  \
 # Install ACTSFW
 RUN spack install ${ACTSFW_SPACK_SPEC}
 
-# TODO: Run the examples
-# TODO: Clean up
+# Run the framework examples
+#
+# FIXME: Fix currently failing examples ACTFWBFieldAccessExample,
+#        ACTFWBFieldExample, ACTFWDD4hepExtrapolationExample,
+#        ACTFWDD4hepGeometryExample, ACTFWDD4hepPropagationExample
+#
+RUN spack load ${ACTSFW_SPACK_SPEC}                                            \
+    && spack load dd4hep                                                       \
+    && mkdir ~/tmp                                                             \
+    && cd ~/tmp                                                                \
+    && ACTFWGenericExtrapolationExample -n 100                                 \
+    && ACTFWGenericGeometryExample -n 100                                      \
+    && ACTFWGenericPropagationExample -n 100                                   \
+    && ACTFWHelloWorldExample -n 100                                           \
+    && ACTFWParticleGunExample -n 100                                          \
+    && ACTFWRandomNumberExample -n 100                                         \
+    && ACTFWRootExtrapolationExample -n 100                                    \
+    && ACTFWRootGeometryExample -n 100                                         \
+    && ACTFWRootPropagationExample -n 100                                      \
+    && ACTFWWhiteBoardExample -n 100                                           \
+    && cd ~                                                                    \
+    && rm -rf tmp
+
+# Clean up everything
+RUN spack clean -a
