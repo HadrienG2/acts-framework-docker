@@ -22,30 +22,37 @@ ENV ACTSFW_SPACK_SPEC="acts-framework@develop +dd4hep +fatras +geant4 +legacy  \
                        ^ clhep@2.4.0.0"
 
 # Install ACTSFW
-RUN spack install ${ACTSFW_SPACK_SPEC}
+RUN spack install --keep-stage ${ACTSFW_SPACK_SPEC}
 
 # Run the framework examples
 #
 # FIXME: Fix currently failing examples ACTFWBFieldAccessExample,
-#        ACTFWBFieldExample, ACTFWDD4hepExtrapolationExample,
-#        ACTFWDD4hepGeometryExample, ACTFWDD4hepPropagationExample
+#        ACTFWBFieldExample, ACTFWRootExtrapolationExample (exit code 0),
+#        ACTFWRootGeometryExample (exit code 0),
+#        ACTFWRootPropagationExample (exit code 0)
 #
 RUN spack load ${ACTSFW_SPACK_SPEC}                                            \
     && spack load dd4hep                                                       \
-    && mkdir ~/tmp                                                             \
-    && cd ~/tmp                                                                \
-    && ACTFWGenericExtrapolationExample -n 100                                 \
-    && ACTFWGenericGeometryExample -n 100                                      \
+    && spack cd --build-dir ${ACTSFW_SPACK_SPEC}                               \
+    && ACTFWDD4hepExtrapolationExample -n 100                                  \
+    && echo "---------------"                                                  \
+    && ACTFWDD4hepGeometryExample -n 100                                       \
+    && echo "---------------"                                                  \
+    && ACTFWDD4hepExtrapolationExample -n 100                                  \
+    && echo "---------------"                                                  \
     && ACTFWGenericPropagationExample -n 100                                   \
+    && echo "---------------"                                                  \
+    && ACTFWGenericGeometryExample -n 100                                      \
+    && echo "---------------"                                                  \
+    && ACTFWGenericPropagationExample -n 100                                   \
+    && echo "---------------"                                                  \
     && ACTFWHelloWorldExample -n 100                                           \
+    && echo "---------------"                                                  \
     && ACTFWParticleGunExample -n 100                                          \
+    && echo "---------------"                                                  \
     && ACTFWRandomNumberExample -n 100                                         \
-    && ACTFWRootExtrapolationExample -n 100                                    \
-    && ACTFWRootGeometryExample -n 100                                         \
-    && ACTFWRootPropagationExample -n 100                                      \
-    && ACTFWWhiteBoardExample -n 100                                           \
-    && cd ~                                                                    \
-    && rm -rf tmp
+    && echo "---------------"                                                  \
+    && ACTFWWhiteBoardExample -n 100
 
 # Clean up Spack caches and temporary file to shrink the Docker image
 RUN spack clean -a
