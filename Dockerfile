@@ -1,9 +1,9 @@
 # Configure the container's basic properties
 #
-# FIXME: I'd like to build on acts-tests and reuse my binaries, but ACTSFW is
-#        not yet compatible with the latest versions of ROOT and ACTS.
+# NOTE: We do not build on top of acts-tests because we rely on a different ACTS
+#       versions and use different dependency build settings.
 #
-FROM hgrasland/spack-tests
+FROM hgrasland/root-tests:latest-cxx14
 LABEL Description="openSUSE Tumbleweed with ACTSFW installed" Version="0.1"
 CMD bash
 
@@ -12,14 +12,14 @@ CMD bash
 # FIXME: Switch to upstream once this work is integrated.
 #
 RUN cd /opt/spack                                                              \
-    && git remote add HadrienG2 https://github.com/HadrienG2/spack.git         \
     && git fetch HadrienG2                                                     \
     && git checkout HadrienG2/acts-framework
 
 # Specify a full-featured build of ACTSFW
-ENV ACTSFW_SPACK_SPEC="acts-framework@develop +dd4hep +fatras +geant4 +legacy  \
-                                              +openmp +tgeo                    \
-                       ^ clhep@2.4.0.0"
+RUN echo "export ACTSFW_SPACK_SPEC=\"                                          \
+              acts-framework@develop +dd4hep +fatras +geant4 +legacy +tgeo     \
+                  ^ ${ROOT_SPACK_SPEC}\""                                      \
+          >> ${SETUP_ENV}
 
 # Install ACTSFW
 RUN spack install --keep-stage ${ACTSFW_SPACK_SPEC}
@@ -27,20 +27,15 @@ RUN spack install --keep-stage ${ACTSFW_SPACK_SPEC}
 # Run the framework examples
 #
 # FIXME: Fix currently failing examples ACTFWBFieldAccessExample,
-#        ACTFWBFieldExample, ACTFWRootExtrapolationExample (exit code 0),
-#        ACTFWRootGeometryExample (exit code 0),
+#        ACTFWBFieldExample, ACTFWRootGeometryExample (exit code 0),
 #        ACTFWRootPropagationExample (exit code 0)
 #
 RUN spack load ${ACTSFW_SPACK_SPEC}                                            \
     && spack load dd4hep                                                       \
     && spack cd --build-dir ${ACTSFW_SPACK_SPEC}                               \
-    && ACTFWDD4hepExtrapolationExample -n 100                                  \
-    && echo "---------------"                                                  \
     && ACTFWDD4hepGeometryExample -n 100                                       \
     && echo "---------------"                                                  \
-    && ACTFWDD4hepExtrapolationExample -n 100                                  \
-    && echo "---------------"                                                  \
-    && ACTFWGenericPropagationExample -n 100                                   \
+    && ACTFWDD4hepPropagationExample -n 100                                    \
     && echo "---------------"                                                  \
     && ACTFWGenericGeometryExample -n 100                                      \
     && echo "---------------"                                                  \
