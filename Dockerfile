@@ -4,7 +4,7 @@
 #       versions and use different dependency build settings.
 #
 FROM hgrasland/root-tests:latest-cxx14
-LABEL Description="openSUSE Tumbleweed with ACTSFW installed" Version="0.1"
+LABEL Description="openSUSE Tumbleweed with ACTSFW installed"
 CMD bash
 
 # Switch to a development branch of Spack with the ACTSFW package
@@ -12,6 +12,7 @@ CMD bash
 # FIXME: Switch to upstream once this work is integrated.
 #
 RUN cd /opt/spack                                                              \
+    && git remote add HadrienG2 https://github.com/HadrienG2/spack.git         \
     && git fetch HadrienG2                                                     \
     && git checkout HadrienG2/acts-framework
 
